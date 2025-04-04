@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinCred", "WinCred\WinCred.csproj", "{41EF4977-604C-45B2-8AD6-BF0D18C25BFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinCred.Test", "WinCred.Test\WinCred.Test.csproj", "{F0BD2E84-86C6-461F-BBF5-0A994328605B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41EF4977-604C-45B2-8AD6-BF0D18C25BFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41EF4977-604C-45B2-8AD6-BF0D18C25BFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41EF4977-604C-45B2-8AD6-BF0D18C25BFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41EF4977-604C-45B2-8AD6-BF0D18C25BFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0BD2E84-86C6-461F-BBF5-0A994328605B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0BD2E84-86C6-461F-BBF5-0A994328605B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0BD2E84-86C6-461F-BBF5-0A994328605B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0BD2E84-86C6-461F-BBF5-0A994328605B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

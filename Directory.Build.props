@@ -1,0 +1,17 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+        <Deterministic>true</Deterministic>
+        <PathMap>$(SolutionDir)=/</PathMap>
+        <GenerateFullPaths>false</GenerateFullPaths>
+        <ReportIVTs>true</ReportIVTs>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <PackageReference>
+            <GeneratePathProperty>true</GeneratePathProperty>
+        </PackageReference>
+    </ItemDefinitionGroup>
+</Project>
