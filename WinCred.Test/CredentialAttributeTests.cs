@@ -1,5 +1,3 @@
-using FluentAssertions;
-
 namespace WinCred.Test;
 
 [TestFixture]

@@ -1,9 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-
-namespace WinCred.Test;
+﻿namespace WinCred.Test;
 
 public abstract class TestFixtureWithAllocationScope
 {

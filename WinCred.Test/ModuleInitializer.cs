@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-
-namespace WinCred.Test;
+﻿namespace WinCred.Test;
 
 internal static class ModuleInitializer
 {
