@@ -1,6 +1,6 @@
 ﻿namespace WinCred;
 
-[PublicAPI]
+[PublicAPI, SupportedOSPlatform("windows")]
 public sealed unsafe class ReadOnlyCredential : IDisposable
 {
     private CREDENTIAL* _credential;

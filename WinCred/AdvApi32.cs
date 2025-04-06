@@ -1,5 +1,6 @@
 ﻿namespace WinCred;
 
+[SupportedOSPlatform("windows")]
 internal static unsafe partial class AdvApi32
 {
     [Flags]
@@ -8,9 +9,6 @@ internal static unsafe partial class AdvApi32
         Default = 0,
         AllCredentials = 1,
     }
-
-    [DllImport(Library, EntryPoint = "CredFree", SetLastError = false)]
-    internal static extern void CredFree(void* buffer);
 
     private static void CredWrite(CREDENTIAL* credential, CredentialInputFlags flags = CredentialInputFlags.None)
     {
@@ -201,7 +199,7 @@ internal static unsafe partial class AdvApi32
     internal static void CredFree(ref CREDENTIAL credential)
     {
         if (Unsafe.IsNullRef(ref credential)) return;
-        CredFree(Unsafe.AsPointer(ref credential));
+        _CredFree(Unsafe.AsPointer(ref credential));
     }
 
     /* UNUSED

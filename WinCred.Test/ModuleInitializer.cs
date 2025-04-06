@@ -6,9 +6,12 @@ internal static class ModuleInitializer
     [ExcludeFromCodeCoverage]
     internal static void Initialize()
     {
-        FluentAssertions.License.Accepted = true;
+        License.Accepted = true;
+
+        if (!OperatingSystem.IsWindows()) return;
         
         // clean up any existing credentials
+
         foreach (ref readonly var cred in Credential.Enumerate("WinCredTest_*"))
         {
             try

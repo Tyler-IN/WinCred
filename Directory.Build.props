@@ -8,6 +8,8 @@
         <GenerateFullPaths>false</GenerateFullPaths>
         <ReportIVTs>true</ReportIVTs>
         <Version>1.0.0</Version>
+        <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
+        <NoWarn>NETSDK1188</NoWarn>
     </PropertyGroup>
 
     <ItemDefinitionGroup>

@@ -1,6 +1,6 @@
 namespace WinCred.Test;
 
-[TestFixture]
+[TestFixture, SupportedOSPlatform("windows")]
 public class CredentialAttributeTests : TestFixtureWithAllocationScope
 {
     private const string TestPrefix = "WinCredAttrTest_";

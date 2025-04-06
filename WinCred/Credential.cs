@@ -6,7 +6,7 @@
 /// <remarks>
 /// Wrapper for a mutable <see cref="CREDENTIAL"/> struct.
 /// </remarks>
-[PublicAPI]
+[PublicAPI, SupportedOSPlatform("windows")]
 public sealed unsafe class Credential : IDisposable
 {
     /// <summary>

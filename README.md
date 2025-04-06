@@ -1,6 +1,8 @@
-# WinCred
+# WinCred <img src="icon.webp" width="40%" align="right" alt="Icon" />
 
 ![License](https://img.shields.io/github/license/Tyler-IN/WinCred)
+
+**Windows Credential Management**
 
 ## Overview
 

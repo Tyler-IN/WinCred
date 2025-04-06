@@ -1,6 +1,6 @@
 namespace WinCred.Test;
 
-[TestFixture]
+[TestFixture, SupportedOSPlatform("windows")]
 public class CredentialBasicTests : TestFixtureWithAllocationScope
 {
     private const string TestPrefix = "WinCredTest_";
@@ -178,7 +178,8 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             const string comment = "Test credential comment";
 
             // Act
-            using var credential = Credential.Create(targetName, comment, CredentialType.Generic, CredentialPersistence.Session);
+            using var credential = Credential.Create(targetName, comment, CredentialType.Generic,
+                CredentialPersistence.Session);
             credential.Data.SetUserName(user);
             credential.Commit();
 
@@ -300,7 +301,8 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
         try
         {
             // Act
-            using var credential = Credential.Create(targetName, largeComment, CredentialType.Generic, CredentialPersistence.Session);
+            using var credential = Credential.Create(targetName, largeComment, CredentialType.Generic,
+                CredentialPersistence.Session);
             credential.Data.SetUserName("largecommentuser");
             credential.Commit();
 
@@ -321,7 +323,7 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             }
         }
     }
-    
+
     [Test]
     public void Create_CredentialWithTooLargeComment_DoesNotSave()
     {
@@ -332,7 +334,8 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
         try
         {
             // Act
-            using var credential = Credential.Create(targetName, largeComment, CredentialType.Generic, CredentialPersistence.Session);
+            using var credential = Credential.Create(targetName, largeComment, CredentialType.Generic,
+                CredentialPersistence.Session);
         }
         catch (ArgumentOutOfRangeException ex)
         {

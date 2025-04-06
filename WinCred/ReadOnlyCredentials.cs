@@ -1,6 +1,6 @@
 ﻿namespace WinCred;
 
-[PublicAPI]
+[PublicAPI, SupportedOSPlatform("windows")]
 public sealed unsafe class ReadOnlyCredentials : IDisposable
 {
     public static readonly ReadOnlyCredentials Empty = new(null, 0);
@@ -27,7 +27,7 @@ public sealed unsafe class ReadOnlyCredentials : IDisposable
     {
         if (_credentials is null) return;
         GC.SuppressFinalize(this);
-        AdvApi32.CredFree(_credentials);
+        AdvApi32._CredFree(_credentials);
         _credentials = null;
     }
 

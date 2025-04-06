@@ -16,4 +16,7 @@ internal static unsafe partial class AdvApi32
     [DllImport(Library, EntryPoint = "CredEnumerateW", SetLastError = true)]
     private static extern int _CredEnumerate(char* filter, CredentialEnumerationFlags flags, uint* count,
         CREDENTIAL*** credentials);
+
+    [DllImport(Library, EntryPoint = "CredFree", SetLastError = false)]
+    internal static extern void _CredFree(void* buffer);
 }

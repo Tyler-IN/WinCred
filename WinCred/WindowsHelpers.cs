@@ -1,5 +1,5 @@
 namespace WinCred;
-
+[SupportedOSPlatform("windows")]
 internal static unsafe class WindowsHelpers
 {
     private const string Kernel32 = "kernel32";
