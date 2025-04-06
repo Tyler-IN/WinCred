@@ -24,7 +24,7 @@ internal static unsafe partial class AdvApi32
     private static bool CredRead(ReadOnlySpan<char> targetName, CredentialType type, out CREDENTIAL* credential)
     {
         if (!targetName.IsEmpty && targetName[^1] != 0)
-            ExceptionHelper.ArgumentException(nameof(targetName), "Must be null-terminated.");
+            ExceptionHelper.ArgumentException(nameof(targetName), "Must be not empty and null-terminated.");
         fixed (char* tn = targetName)
         fixed (CREDENTIAL** pc = &credential)
         {
@@ -74,7 +74,7 @@ internal static unsafe partial class AdvApi32
     public static bool CredDelete(ReadOnlySpan<char> targetName, CredentialType type)
     {
         if (!targetName.IsEmpty && targetName[^1] != 0)
-            ExceptionHelper.ArgumentException(nameof(targetName), "Must be null-terminated.");
+            ExceptionHelper.ArgumentException(nameof(targetName), "Must be not empty and null-terminated.");
 
         int result;
         fixed (char* tn = targetName)
@@ -116,7 +116,7 @@ internal static unsafe partial class AdvApi32
     private static bool CredEnumerate(ReadOnlySpan<char> filter, out uint count, ref CREDENTIAL** credentials)
     {
         if (!filter.IsEmpty && filter[^1] != 0)
-            ExceptionHelper.ArgumentException(nameof(filter), "Must be null-terminated.");
+            ExceptionHelper.ArgumentException(nameof(filter), "Must be not empty and null-terminated.");
         fixed (char* f = filter)
         fixed (uint* pCount = &count)
         fixed (CREDENTIAL*** pCredentials = &credentials)
