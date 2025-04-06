@@ -1,5 +1,8 @@
-﻿namespace WinCred;
+﻿#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+namespace WinCred;
 
+[PublicAPI]
+[ExcludeFromCodeCoverage]
 public unsafe readonly struct ReadOnlyPtr<T> : IEquatable<Ptr<T>>
 {
     private readonly T* _value;

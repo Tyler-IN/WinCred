@@ -17,9 +17,23 @@ public sealed unsafe class Credential : IDisposable
     /// * <see cref="CREDENTIAL_ATTRIBUTE.Keyword"/>
     /// </summary>
     /// <remarks>
+    /// Note that this includes the null terminator, so you should likely refer to the <see cref="MaximumStringLength"/> instead.
     /// Defined by CRED_MAX_STRING_LENGTH; 256 bytes.
     /// </remarks>
     public const int MaximumStringSize = 256;
+
+    /// <summary>
+    /// The maximum length of various string members.
+    /// * <see cref="CREDENTIAL.TargetName"/>
+    /// * <see cref="CREDENTIAL.Comment"/>
+    /// * <see cref="CREDENTIAL.TargetAlias"/>
+    /// * <see cref="CREDENTIAL_ATTRIBUTE.Keyword"/>
+    /// </summary>
+    /// <remarks>
+    /// Note that this excludes the null terminator which is included in the <see cref="MaximumStringSize"/>.
+    /// This is defined as one less than the maximum string size.
+    /// </remarks>
+    public const int MaximumStringLength = MaximumStringSize - 1;
 
     /// <summary>
     /// The size, in bytes, of the <see cref="CREDENTIAL_ATTRIBUTE.Value"/> member. 
@@ -61,27 +75,35 @@ public sealed unsafe class Credential : IDisposable
         return new Credential(c);
     }
 
-    public bool Commit(CredInputFlags flags = CredInputFlags.None)
+    public void Commit(CredInputFlags flags = CredInputFlags.None)
     {
         ThrowIfDisposed();
-        return AdvApi32.CredWrite(this, flags);
+        AdvApi32.CredWrite(this, flags);
     }
 
-    internal CREDENTIAL* _credential;
-    public ref CREDENTIAL Data => ref Unsafe.AsRef<CREDENTIAL>(_credential);
+    internal CREDENTIAL* _data;
+
+    public ref CREDENTIAL Data
+    {
+        get
+        {
+            ThrowIfDisposed();
+            return ref Unsafe.AsRef<CREDENTIAL>(_data);
+        }
+    }
 
     [MustDisposeResource]
-    private Credential(CREDENTIAL* credential) => _credential = credential;
+    private Credential(CREDENTIAL* data) => _data = data;
 
     ~Credential()
     {
-        if (_credential is null) return;
+        if (_data is null) return;
         Dispose();
     }
 
     public void Dispose()
     {
-        if (_credential is null) return;
+        if (_data is null) return;
         GC.SuppressFinalize(this);
         // free all pointers inside first
 
@@ -101,7 +123,7 @@ public sealed unsafe class Credential : IDisposable
             MemoryHelpers.FreeAndNull(ref Data._attributes);
         }
 
-        MemoryHelpers.FreeAndNull(ref _credential);
+        MemoryHelpers.FreeAndNull(ref _data);
     }
 
     public ref CREDENTIAL_ATTRIBUTE AddAttribute()
@@ -131,7 +153,7 @@ public sealed unsafe class Credential : IDisposable
         }
     }
 
-    public void RemoveAttribute(int index, bool freeOldAttributeList = true)
+    public void RemoveAttribute(int index)
     {
         ThrowIfDisposed();
         var oldAttributes = Data.Attributes;
@@ -145,8 +167,10 @@ public sealed unsafe class Credential : IDisposable
         oldAttributes[..index].CopyTo(newAttributes);
         oldAttributes[(index + 1)..].CopyTo(newAttributes[index..]);
         (Data._attributes, Data._attributeCount) = newAttributes;
-        if (freeOldAttributeList)
-            MemoryHelpers.Free(pOld);
+        
+        MemoryHelpers.FreeIfNotNull(removed._keyword);
+        MemoryHelpers.FreeIfNotNull(removed._value);
+        MemoryHelpers.Free(pOld);
     }
 
     public int IndexOfAttribute(ref CREDENTIAL_ATTRIBUTE attribute)
@@ -183,11 +207,20 @@ public sealed unsafe class Credential : IDisposable
         CredPersist persist = CredPersist.LocalMachine)
     {
         var cred = Draft();
-        ref var value = ref cred.Data;
-        value.Type = CredType.Generic;
-        value.SetTargetName(target);
-        value.SetComment(comment);
-        value.Persist = persist;
+        try
+        {
+            ref var value = ref cred.Data;
+            value.Type = CredType.Generic;
+            value.SetTargetName(target);
+            value.SetComment(comment);
+            value.Persist = persist;
+        }
+        catch
+        {
+            cred.Dispose();
+            throw;
+        }
+
         return cred;
     }
 
@@ -217,6 +250,9 @@ public sealed unsafe class Credential : IDisposable
 
     public static bool Delete(ReadOnlySpan<char> target, CredType type)
     {
+        if (target.Length > MaximumStringLength)
+            ExceptionHelper.ArgumentOutOfRange(nameof(target), "Target name is too long.");
+
         var copy = ReadOnlySpan<char>.Empty;
         try
         {
@@ -256,7 +292,7 @@ public sealed unsafe class Credential : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void ThrowIfDisposed()
     {
-        if (_credential is null)
+        if (_data is null)
             ExceptionHelper.ObjectDisposed(nameof(Credential),
                 "Cannot access a disposed credential.");
     }

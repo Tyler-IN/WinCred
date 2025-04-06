@@ -2,6 +2,7 @@ using System.Diagnostics;
 
 namespace WinCred;
 
+[ExcludeFromCodeCoverage]
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct AllocationRecord : IEquatable<AllocationRecord>
 {
@@ -76,6 +77,7 @@ public unsafe struct AllocationRecord : IEquatable<AllocationRecord>
         => !left.Equals(right);
 }
 
+[ExcludeFromCodeCoverage]
 public static class AllocationRecordHelpers
 {
     public static unsafe StringBuilder Append(this StringBuilder sb, in AllocationRecord r)

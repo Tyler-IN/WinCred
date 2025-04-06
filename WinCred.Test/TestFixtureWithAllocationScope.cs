@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace WinCred.Test;
@@ -9,6 +10,7 @@ public abstract class TestFixtureWithAllocationScope
     private static readonly ConcurrentDictionary<Type, AllocationScope> TestAllocScopes = new();
     private AllocationScope _allocScope;
 
+    [ExcludeFromCodeCoverage]
     public static void OneTimeSetup(Type t)
     {
         if (t is null) throw new ArgumentNullException(nameof(t));
@@ -16,6 +18,7 @@ public abstract class TestFixtureWithAllocationScope
             throw new InvalidOperationException("Concurrent allocation scope with the same test not allowed!");
     }
 
+    [ExcludeFromCodeCoverage]
     public static void OneTimeTeardown(Type t)
     {
         if (t is null) throw new ArgumentNullException(nameof(t));
@@ -24,6 +27,7 @@ public abstract class TestFixtureWithAllocationScope
     }
 
     [SetUp]
+    [ExcludeFromCodeCoverage]
     public virtual void Setup()
     {
         var t = TestContext.CurrentContext.Test;
@@ -31,6 +35,8 @@ public abstract class TestFixtureWithAllocationScope
     }
 
     [TearDown]
+    [ExcludeFromCodeCoverage]
+    [SuppressMessage("ReSharper", "NUnitAssertMigration")]
     public virtual unsafe void Teardown()
     {
         TestContext.WriteLine("Before collecting garbage;");
@@ -43,6 +49,8 @@ public abstract class TestFixtureWithAllocationScope
             TestContext.WriteLine("No leaks detected.");
             return;
         }
+        
+        Assert.Warn($"Pre-finalization memory leak detected: {bytesAllocated - bytesFreed} bytes");
 
         TestContext.WriteLine("Collecting garbage...");
         var started = Stopwatch.GetTimestamp();
@@ -58,8 +66,9 @@ public abstract class TestFixtureWithAllocationScope
         _allocScope.ForAllOutstanding(static p => MemoryHelpers.Free((void*) p));
         _allocScope.Dispose();
 
-        TestContext.WriteLine(bytesAllocated == bytesFreed
-            ? "No leaks detected."
-            : $"Memory leak detected: {bytesAllocated - bytesFreed} bytes");
+        if (bytesAllocated == bytesFreed)
+            TestContext.WriteLine("No leaks detected.");
+        else
+            Assert.Fail($"Memory leak detected: {bytesAllocated - bytesFreed} bytes");
     }
 }

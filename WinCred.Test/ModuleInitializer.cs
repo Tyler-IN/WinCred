@@ -1,10 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace WinCred.Test;
 
 internal static class ModuleInitializer
 {
     [ModuleInitializer]
+    [ExcludeFromCodeCoverage]
     internal static void Initialize()
     {
         FluentAssertions.License.Accepted = true;

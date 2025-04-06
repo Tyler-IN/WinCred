@@ -60,10 +60,9 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
             credential.Data.SetUserName(username);
             credential.Data.SetCredentialBlob(password);
-            var committed = credential.Commit();
+            credential.Commit();
 
             // Assert
-            committed.Should().BeTrue("Commit should succeed");
             var retrieved = Credential.Read(targetName, CredType.Generic);
             retrieved.Should().NotBeNull();
             retrieved.Value.UserName.ToString().Should().Be(username);
@@ -98,10 +97,9 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
             credential.Data.SetUserName(username);
             credential.Data.SetCredentialBlob(password, utf8: true);
-            var committed = credential.Commit();
+            credential.Commit();
 
             // Assert
-            committed.Should().BeTrue("Commit should succeed");
             var retrieved = Credential.Read(targetName, CredType.Generic);
             retrieved.Should().NotBeNull();
             retrieved.Value.UserName.ToString().Should().Be(username);
@@ -144,10 +142,9 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
         {
             using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
             credential.Data.SetUserName("deletetest");
-            var committed = credential.Commit();
+            credential.Commit();
 
             // Verify it exists
-            committed.Should().BeTrue("Commit should succeed");
             var exists = Credential.Read(targetName, CredType.Generic);
             exists.Should().NotBeNull();
 
@@ -185,10 +182,9 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             // Act
             using var credential = Credential.Create(targetName, comment, CredType.Generic, CredPersist.Session);
             credential.Data.SetUserName(user);
-            var committed = credential.Commit();
+            credential.Commit();
 
             // Assert
-            committed.Should().BeTrue("Commit should succeed");
             var retrieved = Credential.Read(targetName, CredType.Generic);
             retrieved.Should().NotBeNull();
             retrieved.Value.UserName.ToString().Should().Be(user);
@@ -218,13 +214,11 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
         {
             using var cred1 = Credential.Create(targetName1, CredType.Generic, CredPersist.Session);
             cred1.Data.SetUserName("user1");
-            var committed1 = cred1.Commit();
-            committed1.Should().BeTrue("Commit should succeed");
+            cred1.Commit();
 
             using var cred2 = Credential.Create(targetName2, CredType.Generic, CredPersist.Session);
             cred2.Data.SetUserName("user2");
-            var committed2 = cred2.Commit();
-            committed2.Should().BeTrue("Commit should succeed");
+            cred2.Commit();
 
             // Act
             var credentials = Credential.Enumerate(TestPrefix + "*");
@@ -268,7 +262,7 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             using var original = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
             original.Data.SetUserName("originaluser");
             original.Data.SetComment("Original comment");
-            var committed = original.Commit();
+            original.Commit();
 
             var readOnly = Credential.Read(targetName, CredType.Generic);
             readOnly.Should().NotBeNull();
@@ -277,7 +271,6 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             using var copy = readOnly.CreateMutableCopy();
 
             // Assert
-            committed.Should().BeTrue("Commit should succeed");
             copy.Should().NotBeNull();
             var dataTargetName = copy.Data.TargetName.ToString();
             var dataUserName = copy.Data.UserName.ToString();
@@ -296,6 +289,57 @@ public class CredentialBasicTests : TestFixtureWithAllocationScope
             {
                 // Ignore cleanup failures
             }
+        }
+    }
+
+    [Test]
+    public void Create_CredentialWithLargeComment_SavesSuccessfully()
+    {
+        // Arrange
+        var targetName = GetUniqueTargetName();
+        var largeComment = new string('A', Credential.MaximumStringLength);
+
+        try
+        {
+            // Act
+            using var credential = Credential.Create(targetName, largeComment, CredType.Generic, CredPersist.Session);
+            credential.Data.SetUserName("largecommentuser");
+            credential.Commit();
+
+            // Assert
+            var retrieved = Credential.Read(targetName, CredType.Generic);
+            retrieved.Should().NotBeNull();
+            retrieved.Value.Comment.ToString().Should().Be(largeComment);
+        }
+        finally
+        {
+            try
+            {
+                Credential.Delete(targetName, CredType.Generic);
+            }
+            catch
+            {
+                // Ignore cleanup failures
+            }
+        }
+    }
+    
+    [Test]
+    public void Create_CredentialWithTooLargeComment_DoesNotSave()
+    {
+        // Arrange
+        var targetName = GetUniqueTargetName();
+        var largeComment = new string('A', Credential.MaximumStringSize);
+
+        try
+        {
+            // Act
+            using var credential = Credential.Create(targetName, largeComment, CredType.Generic, CredPersist.Session);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            // Assert
+            ex.Message.Should().StartWith("String size exceeds maximum size.");
         }
     }
 }

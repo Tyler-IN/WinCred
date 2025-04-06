@@ -5,6 +5,7 @@ namespace WinCred;
 
 public readonly struct Empty;
 
+[ExcludeFromCodeCoverage]
 public sealed class AllocationScope : IDisposable
 {
     [ThreadStatic]

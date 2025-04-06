@@ -267,7 +267,7 @@ public unsafe struct CREDENTIAL
 
     
     [MustDisposeResource, MustUseReturnValue]
-    public readonly Credential CreateMutableCopy()
+    internal readonly Credential CreateMutableCopy()
     {
         var draft = Credential.Draft();
         CopyTo(ref draft.Data);

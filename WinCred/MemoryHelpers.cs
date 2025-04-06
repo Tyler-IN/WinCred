@@ -307,7 +307,11 @@ public static class MemoryHelpers
         return new ReadOnlySpan<byte>(pNewChars, newCharsLength);
     }
 
-    public static unsafe ReadOnlySpan<char> DuplicateNullTerminated(char* pChars, int max, bool includeNull = false)
+    public static unsafe ReadOnlySpan<char> DuplicateNullTerminated(char* pChars, int max, bool includeNull = false,
+        [CallerFilePath]
+        string? file = "",
+        [CallerLineNumber]
+        int line = 0)
     {
         if (pChars is null)
             return ReadOnlySpan<char>.Empty;
@@ -322,7 +326,7 @@ public static class MemoryHelpers
 
         var length = unchecked((uint) NullTerminatedLength(pChars, max));
         //var pNewChars = (char*) Marshal.AllocHGlobal((nint) length + 1);
-        New<char>(out var pNewChars, (int) length + 1);
+        New<char>(out var pNewChars, (int) length + 1, file, line);
         Unsafe.CopyBlockUnaligned(pNewChars, pChars,
             length * sizeof(char));
         pNewChars[length] = default;

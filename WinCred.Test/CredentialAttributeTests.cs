@@ -59,10 +59,9 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         ref var attribute = ref credential.AddAttribute();
         attribute.SetKeyword("TestCompany_AttrName");
         attribute.SetValue("AttributeValue");
-        var committed = credential.Commit();
+        credential.Commit();
 
         // Assert
-        committed.Should().BeTrue("Commit should succeed");
         var retrieved = Credential.Read(targetName, CredType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(1);
@@ -117,10 +116,9 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         System.Text.Encoding.Unicode.GetString(credential.Data.Attributes[1].Value)
             .Should().Be("Value2");
 
-        var committed = credential.Commit();
+        credential.Commit();
 
         // Assert
-        committed.Should().BeTrue("Commit should succeed");
         var retrieved = Credential.Read(targetName, CredType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(2);
@@ -158,10 +156,9 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         attr2.SetValue("Value2");
 
         // Save initial state
-        var committed = credential.Commit();
+        credential.Commit();
 
         // Get a fresh copy
-        committed.Should().BeTrue("Commit should succeed");
         var oldCopy = Credential.Read(targetName, CredType.Generic);
         using var mutableCopy = oldCopy!.CreateMutableCopy();
 
@@ -180,10 +177,9 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
 
         indexToRemove.Should().BeGreaterThanOrEqualTo(0, "Should find the attribute to remove");
         mutableCopy.RemoveAttribute(indexToRemove);
-        var committedFresh = mutableCopy.Commit();
+        mutableCopy.Commit();
 
         // Assert
-        committedFresh.Should().BeTrue("Commit should succeed");
         var newCopy = Credential.Read(targetName, CredType.Generic);
         newCopy.Should().NotBeNull();
         newCopy.Value.Attributes.Length.Should().Be(1);
@@ -212,10 +208,9 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         var testInt = 12345;
         intAttr.SetValue([testInt]);
 
-        var committed = credential.Commit();
+        credential.Commit();
 
         // Assert
-        committed.Should().BeTrue("Commit should succeed");
         var retrieved = Credential.Read(targetName, CredType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(3);
@@ -262,5 +257,31 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
 
         // Assert
         index.Should().BeGreaterThanOrEqualTo(0, "Should find the attribute");
+    }
+
+    [Test]
+    public void AddAttribute_SpecialCharacters_SavesSuccessfully()
+    {
+        // Arrange
+        var targetName = GetUniqueTargetName();
+        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        credential.Data.SetUserName("specialcharuser");
+
+        // Act
+        ref var attribute = ref credential.AddAttribute();
+        attribute.SetKeyword("TestCompany_SpecialChars");
+        attribute.SetValue("Attr!@#$%^&*()_+");
+
+        credential.Commit();
+
+        // Assert
+        var retrieved = Credential.Read(targetName, CredType.Generic);
+        retrieved.Should().NotBeNull();
+        retrieved.Value.Attributes.Length.Should().Be(1);
+
+        var attr = retrieved.Value.Attributes[0];
+        attr.Keyword.ToString().Should().Be("TestCompany_SpecialChars");
+        System.Text.Encoding.Unicode.GetString(attr.Value)
+            .Should().Be("Attr!@#$%^&*()_+");
     }
 }

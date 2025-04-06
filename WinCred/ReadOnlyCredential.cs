@@ -28,5 +28,6 @@ public sealed unsafe class ReadOnlyCredential : IDisposable
     /// </summary>
     /// <returns>A new Credential instance with the same data.</returns>
     [MustDisposeResource, MustUseReturnValue]
-    public Credential CreateMutableCopy() => Value.CreateMutableCopy();
+    public Credential CreateMutableCopy()
+        => Value.CreateMutableCopy();
 }
