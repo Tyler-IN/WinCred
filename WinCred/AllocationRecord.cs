@@ -1,8 +1,6 @@
-using System.Diagnostics;
-
 namespace WinCred;
 
-[ExcludeFromCodeCoverage]
+[PublicAPI, ExcludeFromCodeCoverage]
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct AllocationRecord : IEquatable<AllocationRecord>
 {

@@ -1,7 +1,10 @@
 ﻿namespace WinCred;
 
+/// <summary>
+/// Values of the Credential Persist field.
+/// </summary>
 [PublicAPI]
-public enum CredPersist : uint
+public enum CredentialPersistence : uint
 {
     None = 0,
 

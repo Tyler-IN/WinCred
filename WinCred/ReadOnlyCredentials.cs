@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace WinCred;
+﻿namespace WinCred;
 
 [PublicAPI]
 public sealed unsafe class ReadOnlyCredentials : IDisposable
@@ -10,7 +8,7 @@ public sealed unsafe class ReadOnlyCredentials : IDisposable
     private CREDENTIAL** _credentials;
     private readonly uint _count;
 
-    public ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>> Span
+    public ReadOnlySpan<ReadOnlyPointer<CREDENTIAL>> Span
         => new(_credentials, (int) _count);
 
     public ReadOnlyCredentials(CREDENTIAL** credentials, uint count)
@@ -66,10 +64,10 @@ public sealed unsafe class ReadOnlyCredentials : IDisposable
 
     public ref struct Enumerator
     {
-        private readonly ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>> _span;
+        private readonly ReadOnlySpan<ReadOnlyPointer<CREDENTIAL>> _span;
         private int _index;
 
-        internal Enumerator(ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>> span)
+        internal Enumerator(ReadOnlySpan<ReadOnlyPointer<CREDENTIAL>> span)
         {
             _span = span;
             _index = -1;

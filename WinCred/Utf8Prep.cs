@@ -1,6 +1,6 @@
 namespace WinCred;
 
-public readonly ref struct Utf8Prep
+internal readonly ref struct Utf8Prep
 {
     public readonly ReadOnlySpan<char> Chars;
     public readonly int Utf8Length;

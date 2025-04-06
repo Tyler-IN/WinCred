@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace WinCred;
+﻿namespace WinCred;
 
 [PublicAPI]
+[SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
 public static class MemoryHelpers
 {
     public static unsafe void Clear(byte* start, nuint size)
@@ -433,6 +432,7 @@ public static class MemoryHelpers
         return (int) (current - str);
     }
 
+    [SuppressMessage("ReSharper", "CognitiveComplexity")]
     public static unsafe int NullTerminatedLength(byte* str, int max)
     {
         if (str == null)
@@ -515,6 +515,7 @@ public static class MemoryHelpers
         return (int) (current - str);
     }
 
+    [SuppressMessage("ReSharper", "CognitiveComplexity")]
     public static unsafe int NullTerminatedLength(char* str, int max)
     {
         if (str == null)

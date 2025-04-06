@@ -75,12 +75,13 @@ public sealed unsafe class Credential : IDisposable
         return new Credential(c);
     }
 
-    public void Commit(CredInputFlags flags = CredInputFlags.None)
+    public void Commit(CredentialInputFlags flags = CredentialInputFlags.None)
     {
         ThrowIfDisposed();
         AdvApi32.CredWrite(this, flags);
     }
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal CREDENTIAL* _data;
 
     public ref CREDENTIAL Data
@@ -167,7 +168,7 @@ public sealed unsafe class Credential : IDisposable
         oldAttributes[..index].CopyTo(newAttributes);
         oldAttributes[(index + 1)..].CopyTo(newAttributes[index..]);
         (Data._attributes, Data._attributeCount) = newAttributes;
-        
+
         MemoryHelpers.FreeIfNotNull(removed._keyword);
         MemoryHelpers.FreeIfNotNull(removed._value);
         MemoryHelpers.Free(pOld);
@@ -189,12 +190,12 @@ public sealed unsafe class Credential : IDisposable
 
     [MustDisposeResource, MustUseReturnValue]
     public static Credential Create(ReadOnlySpan<char> target,
-        CredType type = CredType.Generic,
-        CredPersist persist = CredPersist.LocalMachine)
+        CredentialType type = CredentialType.Generic,
+        CredentialPersistence persist = CredentialPersistence.LocalMachine)
     {
         var cred = Draft();
         ref var value = ref cred.Data;
-        value.Type = CredType.Generic;
+        value.Type = CredentialType.Generic;
         value.SetTargetName(target);
         value.Persist = persist;
         return cred;
@@ -203,14 +204,14 @@ public sealed unsafe class Credential : IDisposable
 
     [MustDisposeResource, MustUseReturnValue]
     public static Credential Create(ReadOnlySpan<char> target, ReadOnlySpan<char> comment,
-        CredType type = CredType.Generic,
-        CredPersist persist = CredPersist.LocalMachine)
+        CredentialType type = CredentialType.Generic,
+        CredentialPersistence persist = CredentialPersistence.LocalMachine)
     {
         var cred = Draft();
         try
         {
             ref var value = ref cred.Data;
-            value.Type = CredType.Generic;
+            value.Type = CredentialType.Generic;
             value.SetTargetName(target);
             value.SetComment(comment);
             value.Persist = persist;
@@ -229,12 +230,14 @@ public sealed unsafe class Credential : IDisposable
     {
         var cred = Draft();
         ref var value = ref cred.Data;
-        value.Type = CredType.Generic;
+        value.Type = CredentialType.Generic;
         value.SetTargetName(target);
+        action(ref value);
         return cred;
     }
 
-    public static ReadOnlyCredential? Read(ReadOnlySpan<char> target, CredType type)
+    [MustDisposeResource, MustUseReturnValue]
+    public static ReadOnlyCredential? Read(ReadOnlySpan<char> target, CredentialType type)
     {
         var copy = ReadOnlySpan<char>.Empty;
         try
@@ -248,7 +251,7 @@ public sealed unsafe class Credential : IDisposable
         }
     }
 
-    public static bool Delete(ReadOnlySpan<char> target, CredType type)
+    public static bool Delete(ReadOnlySpan<char> target, CredentialType type)
     {
         if (target.Length > MaximumStringLength)
             ExceptionHelper.ArgumentOutOfRange(nameof(target), "Target name is too long.");

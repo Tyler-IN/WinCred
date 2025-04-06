@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace WinCred;
+﻿namespace WinCred;
 
 [ExcludeFromCodeCoverage]
 public static class ExceptionHelper

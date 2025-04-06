@@ -68,7 +68,7 @@ public static class CREDENTIAL_ATTRIBUTE_Helper
     /// </remarks>
     /// <param name="ca">The relevant credential attribute.</param>
     /// <param name="value">The value to set.</param>
-    public static unsafe ref CREDENTIAL_ATTRIBUTE SetValue(ref this CREDENTIAL_ATTRIBUTE ca, ReadOnlySpan<byte> value)
+    public static ref CREDENTIAL_ATTRIBUTE SetValue(ref this CREDENTIAL_ATTRIBUTE ca, ReadOnlySpan<byte> value)
         => ref SetValueInternal(ref ca, value);
 
     /// <summary>

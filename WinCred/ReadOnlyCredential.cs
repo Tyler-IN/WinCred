@@ -7,7 +7,7 @@ public sealed unsafe class ReadOnlyCredential : IDisposable
     public ref readonly CREDENTIAL Value => ref Unsafe.AsRef<CREDENTIAL>(_credential);
 
     [MustDisposeResource]
-    public ReadOnlyCredential(CREDENTIAL* credential) => _credential = credential;
+    internal ReadOnlyCredential(CREDENTIAL* credential) => _credential = credential;
 
     ~ReadOnlyCredential()
     {

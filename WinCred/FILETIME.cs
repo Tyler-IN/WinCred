@@ -26,4 +26,10 @@ public struct FILETIME
             Low = (uint) (dateTimeOffset.ToFileTime() & 0xFFFFFFFF),
             High = (uint) ((dateTimeOffset.ToFileTime() >> 32) & 0xFFFFFFFF)
         };
+
+    public static implicit operator FILETIME(System.Runtime.InteropServices.ComTypes.FILETIME ft)
+        => new() {Low = unchecked((uint) ft.dwLowDateTime), High = unchecked((uint) ft.dwHighDateTime)};
+
+    public static implicit operator System.Runtime.InteropServices.ComTypes.FILETIME(FILETIME ft)
+        => new() {dwLowDateTime = unchecked((int) ft.Low), dwHighDateTime = unchecked((int) ft.High)};
 }

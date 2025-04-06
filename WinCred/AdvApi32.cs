@@ -1,45 +1,27 @@
-﻿using System.Diagnostics;
+﻿namespace WinCred;
 
-namespace WinCred;
-
-[SuppressMessage("ReSharper", "InconsistentNaming")]
 internal static unsafe partial class AdvApi32
 {
-    private const string Library = "advapi32";
-
     [Flags]
-    private enum CredEnumerateFlags : uint
+    private enum CredentialEnumerationFlags : uint
     {
         Default = 0,
         AllCredentials = 1,
     }
 
-    [DllImport(Library, EntryPoint = "CredWriteW", SetLastError = true)]
-    private static extern int _CredWrite(CREDENTIAL* Credential, CredInputFlags Flags);
-
-    [DllImport(Library, EntryPoint = "CredReadW", SetLastError = false)]
-    private static extern int _CredRead(char* TargetName, CredType Type, uint Flags, CREDENTIAL** Credential);
-
-    [DllImport(Library, EntryPoint = "CredDeleteW", SetLastError = false)]
-    private static extern int _CredDelete(char* TargetName, CredType Type, uint Flags);
-
-    [DllImport(Library, EntryPoint = "CredEnumerateW", SetLastError = false)]
-    private static extern int _CredEnumerate(char* Filter, CredEnumerateFlags Flags, uint* Count,
-        CREDENTIAL*** Credentials);
-
     [DllImport(Library, EntryPoint = "CredFree", SetLastError = false)]
-    internal static extern void CredFree(void* Buffer);
+    internal static extern void CredFree(void* buffer);
 
-    private static void CredWrite(CREDENTIAL* credential, CredInputFlags flags = CredInputFlags.None)
+    private static void CredWrite(CREDENTIAL* credential, CredentialInputFlags flags = CredentialInputFlags.None)
     {
         if (_CredWrite(credential, flags) == 0)
             ExceptionHelper.LastWin32Exception();
     }
 
-    public static void CredWrite(Credential credential, CredInputFlags flags = CredInputFlags.None)
+    public static void CredWrite(Credential credential, CredentialInputFlags flags = CredentialInputFlags.None)
         => CredWrite(credential._data, flags);
 
-    private static bool CredRead(ReadOnlySpan<char> targetName, CredType type, out CREDENTIAL* credential)
+    private static bool CredRead(ReadOnlySpan<char> targetName, CredentialType type, out CREDENTIAL* credential)
     {
         if (!targetName.IsEmpty && targetName[^1] != 0)
             ExceptionHelper.ArgumentException(nameof(targetName), "Must be null-terminated.");
@@ -49,20 +31,24 @@ internal static unsafe partial class AdvApi32
             if (_CredRead(tn, type, 0, pc) != 0)
                 return true;
 
-            var error = WindowsHelpers.GetLastError(false);
-            if (error == (uint) Error.NotFound)
+            var error = WindowsHelpers.GetLastError();
+            switch (error)
             {
-                WindowsHelpers.ClearLastError();
-                return false;
+                case 0:
+                    credential = null;
+                    return false;
+                case (uint) Error.NotFound:
+                    WindowsHelpers.ClearLastError();
+                    return false;
+                default:
+                    ExceptionHelper.Win32Exception(error);
+                    return false;
             }
-
-            ExceptionHelper.Win32Exception(error);
-            return false;
         }
     }
 
     [MustDisposeResource, MustUseReturnValue]
-    public static ReadOnlyCredential? CredRead(ReadOnlySpan<char> targetName, CredType type)
+    public static ReadOnlyCredential? CredRead(ReadOnlySpan<char> targetName, CredentialType type)
     {
         var success = CredRead(targetName, type, out var credential);
         if (!success || credential is null)
@@ -70,7 +56,7 @@ internal static unsafe partial class AdvApi32
         return new ReadOnlyCredential(credential);
     }
 
-    public static bool TryRead(ReadOnlySpan<char> targetName, CredType type,
+    public static bool TryRead(ReadOnlySpan<char> targetName, CredentialType type,
         [NotNullWhen(true), MustDisposeResource]
         out ReadOnlyCredential? credential)
     {
@@ -85,7 +71,7 @@ internal static unsafe partial class AdvApi32
         return true;
     }
 
-    public static bool CredDelete(ReadOnlySpan<char> targetName, CredType type)
+    public static bool CredDelete(ReadOnlySpan<char> targetName, CredentialType type)
     {
         if (!targetName.IsEmpty && targetName[^1] != 0)
             ExceptionHelper.ArgumentException(nameof(targetName), "Must be null-terminated.");
@@ -98,16 +84,18 @@ internal static unsafe partial class AdvApi32
 
         if (result != 0) return true;
 
-        var error = WindowsHelpers.GetLastError(false);
-        if (error == (ulong) Error.NotFound)
+        var error = WindowsHelpers.GetLastError();
+        switch (error)
         {
-            WindowsHelpers.ClearLastError();
-            return true;
+            case 0:
+                return false;
+            case (uint) Error.NotFound:
+                WindowsHelpers.ClearLastError();
+                return true;
+            default:
+                ExceptionHelper.Win32Exception(error);
+                return false;
         }
-
-        if (error != 0) ExceptionHelper.Win32Exception(error);
-
-        return false;
     }
 
     public enum Error : uint
@@ -133,10 +121,13 @@ internal static unsafe partial class AdvApi32
         fixed (uint* pCount = &count)
         fixed (CREDENTIAL*** pCredentials = &credentials)
         {
-            if (_CredEnumerate(f, CredEnumerateFlags.Default, pCount, pCredentials) != 0)
+            if (_CredEnumerate(f, CredentialEnumerationFlags.Default, pCount, pCredentials) != 0)
                 return true;
 
-            var error = WindowsHelpers.GetLastError(false);
+            var error = WindowsHelpers.GetLastError();
+            if (error == 0)
+                return false;
+
             if (error == (uint) Error.NotFound)
             {
                 WindowsHelpers.ClearLastError();
@@ -153,11 +144,11 @@ internal static unsafe partial class AdvApi32
         fixed (uint* pCount = &count)
         fixed (CREDENTIAL*** pCredentials = &credentials)
         {
-            if (_CredEnumerate(null, CredEnumerateFlags.AllCredentials, pCount, pCredentials) != 0)
+            if (_CredEnumerate(null, CredentialEnumerationFlags.AllCredentials, pCount, pCredentials) != 0)
                 return true;
 
 
-            var error = WindowsHelpers.GetLastError(false);
+            var error = WindowsHelpers.GetLastError();
             if (error == (uint) Error.NotFound)
             {
                 WindowsHelpers.ClearLastError();
@@ -169,6 +160,7 @@ internal static unsafe partial class AdvApi32
         }
     }
 
+    /* UNUSED *
     private static ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>> CredEnumerate(ReadOnlySpan<char> filter, out uint count)
     {
         CREDENTIAL** credentials = null;
@@ -186,6 +178,7 @@ internal static unsafe partial class AdvApi32
             return ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>>.Empty;
         return new ReadOnlySpan<ReadOnlyPtr<CREDENTIAL>>(credentials, (int) count);
     }
+    */
 
     public static ReadOnlyCredentials? CredEnumerate(ReadOnlySpan<char> filter)
     {
@@ -211,10 +204,12 @@ internal static unsafe partial class AdvApi32
         CredFree(Unsafe.AsPointer(ref credential));
     }
 
-    internal static void CredFree(ReadOnlySpan<CREDENTIAL> credentials)
+    /* UNUSED
+     internal static void CredFree(ReadOnlySpan<CREDENTIAL> credentials)
     {
         if (credentials.IsEmpty) return;
         fixed (CREDENTIAL* p = credentials)
             CredFree(p);
     }
+    */
 }

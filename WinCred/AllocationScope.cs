@@ -5,7 +5,7 @@ namespace WinCred;
 
 public readonly struct Empty;
 
-[ExcludeFromCodeCoverage]
+[PublicAPI, ExcludeFromCodeCoverage]
 public sealed class AllocationScope : IDisposable
 {
     [ThreadStatic]
@@ -59,7 +59,7 @@ public sealed class AllocationScope : IDisposable
         if (Thread.CurrentThread.Name != "Finalizer")
             return false;
 
-        var st = new System.Diagnostics.StackTrace();
+        var st = new StackTrace();
         var frames = st.GetFrames();
         if (frames is null || frames.Length == 0)
             return false;
@@ -103,6 +103,7 @@ public sealed class AllocationScope : IDisposable
     }
 
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    [SuppressMessage("ReSharper", "CognitiveComplexity")]
     public static unsafe void TrackFree(void* p, string? file, int line)
     {
         if (p is null) ExceptionHelper.ArgumentNull(nameof(p));
@@ -144,7 +145,7 @@ public sealed class AllocationScope : IDisposable
         ActiveScopes.TryRemove(this, out _);
     }
 
-    public unsafe void ForAllOutstanding(Action<nint> fn)
+    public void ForAllOutstanding(Action<nint> fn)
     {
         foreach (var p in _outstandingAllocs.Keys)
             fn(p);

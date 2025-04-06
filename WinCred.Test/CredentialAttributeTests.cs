@@ -6,7 +6,7 @@ namespace WinCred.Test;
 public class CredentialAttributeTests : TestFixtureWithAllocationScope
 {
     private const string TestPrefix = "WinCredAttrTest_";
-    private readonly List<string> _createdCredentials = new();
+    private readonly List<string> _createdCredentials = [];
 
 
     [OneTimeSetUp]
@@ -29,7 +29,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         {
             try
             {
-                Credential.Delete(target, CredType.Generic);
+                Credential.Delete(target, CredentialType.Generic);
             }
             catch
             {
@@ -52,7 +52,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
         credential.Data.SetUserName("attruser");
 
         // Act
@@ -62,7 +62,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         credential.Commit();
 
         // Assert
-        var retrieved = Credential.Read(targetName, CredType.Generic);
+        using var retrieved = Credential.Read(targetName, CredentialType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(1);
 
@@ -79,7 +79,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
 
         // Act
         credential.Data.Attributes.IsEmpty.Should().BeTrue();
@@ -119,7 +119,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         credential.Commit();
 
         // Assert
-        var retrieved = Credential.Read(targetName, CredType.Generic);
+        using var retrieved = Credential.Read(targetName, CredentialType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(2);
 
@@ -145,7 +145,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
 
         ref var attr1 = ref credential.AddAttribute();
         attr1.SetKeyword("TestCompany_ToKeep");
@@ -159,7 +159,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         credential.Commit();
 
         // Get a fresh copy
-        var oldCopy = Credential.Read(targetName, CredType.Generic);
+        using var oldCopy = Credential.Read(targetName, CredentialType.Generic);
         using var mutableCopy = oldCopy!.CreateMutableCopy();
 
         // Act - find and remove the second attribute
@@ -180,7 +180,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         mutableCopy.Commit();
 
         // Assert
-        var newCopy = Credential.Read(targetName, CredType.Generic);
+        using var newCopy = Credential.Read(targetName, CredentialType.Generic);
         newCopy.Should().NotBeNull();
         newCopy.Value.Attributes.Length.Should().Be(1);
         newCopy.Value.Attributes[0].Keyword.ToString().Should().Be("TestCompany_ToKeep");
@@ -191,7 +191,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
 
         // Act - test different value types
         ref var strAttr = ref credential.AddAttribute();
@@ -200,7 +200,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
 
         ref var bytesAttr = ref credential.AddAttribute();
         bytesAttr.SetKeyword("TestCompany_Bytes");
-        byte[] testBytes = {1, 2, 3, 4, 5};
+        byte[] testBytes = [1, 2, 3, 4, 5];
         bytesAttr.SetValue(testBytes);
 
         ref var intAttr = ref credential.AddAttribute();
@@ -211,7 +211,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         credential.Commit();
 
         // Assert
-        var retrieved = Credential.Read(targetName, CredType.Generic);
+        using var retrieved = Credential.Read(targetName, CredentialType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(3);
 
@@ -242,7 +242,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
 
         ref var attr1 = ref credential.AddAttribute();
         attr1.SetKeyword("TestCompany_First");
@@ -264,7 +264,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
     {
         // Arrange
         var targetName = GetUniqueTargetName();
-        using var credential = Credential.Create(targetName, CredType.Generic, CredPersist.Session);
+        using var credential = Credential.Create(targetName, CredentialType.Generic, CredentialPersistence.Session);
         credential.Data.SetUserName("specialcharuser");
 
         // Act
@@ -275,7 +275,7 @@ public class CredentialAttributeTests : TestFixtureWithAllocationScope
         credential.Commit();
 
         // Assert
-        var retrieved = Credential.Read(targetName, CredType.Generic);
+        using var retrieved = Credential.Read(targetName, CredentialType.Generic);
         retrieved.Should().NotBeNull();
         retrieved.Value.Attributes.Length.Should().Be(1);
 

@@ -3,7 +3,7 @@ namespace WinCred;
 
 [PublicAPI]
 [ExcludeFromCodeCoverage]
-public unsafe readonly struct ReadOnlyPtr<T> : IEquatable<Ptr<T>>
+public readonly unsafe struct ReadOnlyPointer<T> : IEquatable<Pointer<T>>
 {
     private readonly T* _value;
 
@@ -15,58 +15,58 @@ public unsafe readonly struct ReadOnlyPtr<T> : IEquatable<Ptr<T>>
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ReadOnlyPtr(T* value) => _value = value;
+    public ReadOnlyPointer(T* value) => _value = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ReadOnlyPtr(Ptr<T> value) => _value = value;
+    public ReadOnlyPointer(Pointer<T> value) => _value = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator ReadOnlyPtr<T>(T* pointer) => new(pointer);
+    public static implicit operator ReadOnlyPointer<T>(T* pointer) => new(pointer);
 
     // dereference operator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator T(ReadOnlyPtr<T> ptr) => ptr.Target;
+    public static explicit operator T(ReadOnlyPointer<T> ptr) => ptr.Target;
 
     // dereference operator (unary + subbing for *)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T operator +(ReadOnlyPtr<T> ptr) => ptr.Target;
+    public static T operator +(ReadOnlyPointer<T> ptr) => ptr.Target;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator ReadOnlyPtr<T>(Ptr<T> pointer) => new(pointer);
+    public static implicit operator ReadOnlyPointer<T>(Pointer<T> pointer) => new(pointer);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(T* other)
         => _value == other;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(Ptr<T> other)
+    public bool Equals(Pointer<T> other)
         => _value == other.Value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(ReadOnlyPtr<T> other)
+    public bool Equals(ReadOnlyPointer<T> other)
         => _value == other._value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj)
-        => (obj is ReadOnlyPtr<T> other
+        => (obj is ReadOnlyPointer<T> other
             && Equals(other))
-           || (obj is Ptr<T> otherPtr
+           || (obj is Pointer<T> otherPtr
                && Equals(otherPtr));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(ReadOnlyPtr<T> left, ReadOnlyPtr<T> right)
+    public static bool operator ==(ReadOnlyPointer<T> left, ReadOnlyPointer<T> right)
         => left.Equals(right);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(ReadOnlyPtr<T> left, ReadOnlyPtr<T> right)
+    public static bool operator !=(ReadOnlyPointer<T> left, ReadOnlyPointer<T> right)
         => !(left == right);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(ReadOnlyPtr<T> left, Ptr<T> right)
+    public static bool operator ==(ReadOnlyPointer<T> left, Pointer<T> right)
         => left.Equals(right);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(ReadOnlyPtr<T> left, Ptr<T> right)
+    public static bool operator !=(ReadOnlyPointer<T> left, Pointer<T> right)
         => !(left == right);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

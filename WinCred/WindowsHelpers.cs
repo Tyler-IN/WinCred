@@ -1,6 +1,6 @@
 namespace WinCred;
 
-public static unsafe class WindowsHelpers
+internal static unsafe class WindowsHelpers
 {
     private const string Kernel32 = "kernel32";
 

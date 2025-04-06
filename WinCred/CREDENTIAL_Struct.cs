@@ -4,8 +4,8 @@
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public unsafe struct CREDENTIAL
 {
-    public CredFlags Flags;
-    public CredType Type;
+    public CredentialFlags Flags;
+    public CredentialType Type;
 
     /// <inheritdoc cref="TargetName"/>
     public char* _targetName;
@@ -133,7 +133,7 @@ public unsafe struct CREDENTIAL
     /// <summary>
     /// Defines the persistence of this credential. This member can be read and written.
     /// </summary>
-    public CredPersist Persist;
+    public CredentialPersistence Persist;
 
     /// <summary>
     /// The number of application-defined attributes to be associated with the credential.
