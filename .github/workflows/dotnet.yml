@@ -44,6 +44,7 @@ jobs:
           show-progress: false
       - name: Restore Cache
         id: restore-cache
+        if: always()
         uses: actions/cache/restore@v4.2.3
         with:
           key: ${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
@@ -53,11 +54,93 @@ jobs:
             C:/Users/runneradmin/AppData/Local/NuGet/plugins-cache
             C:/Users/runneradmin/AppData/Local/NuGet/v3-cache
             C:/Users/runneradmin/AppData/Local/NuGet/Cache
+      - name: Hash NuPkg Cache Before Restore
+        id: restored-cache-hash
+        run: |
+          shopt -s globstar nullglob
+          
+          globs=(
+            ~/.nuget/packages/**
+            ~/AppData/Local/NuGet/http-cache/**
+            ~/AppData/Local/NuGet/plugins-cache
+            ~/AppData/Local/NuGet/v3-cache
+            ~/AppData/Local/NuGet/Cache
+          )
+          
+          files=()
+          for pattern in "${globs[@]}"; do
+            for f in $pattern; do
+              files+=("$f")
+            done
+          done
+          
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "hash=no-files" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          sorted_files=($(printf "%s\n" "${files[@]}" | sort))
+          
+          hash=$(for f in "${sorted_files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "$f"
+              cat "$f"
+            fi
+          done | sha256sum | cut -d' ' -f1)
+          
+          echo "hash=$hash" >> $GITHUB_OUTPUT
+          echo "${hash}"
       - name: Restore
+        if: always()
         run: dotnet restore -p:Configuration=Release
+      - name: Hash NuPkg Cache After Restore
+        id: updated-cache-hash
+        run: |
+          shopt -s globstar nullglob
+          
+          globs=(
+            ~/.nuget/packages/**
+            ~/AppData/Local/NuGet/http-cache/**
+            ~/AppData/Local/NuGet/plugins-cache
+            ~/AppData/Local/NuGet/v3-cache
+            ~/AppData/Local/NuGet/Cache
+          )
+          
+          files=()
+          for pattern in "${globs[@]}"; do
+            for f in $pattern; do
+              files+=("$f")
+            done
+          done
+          
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "hash=no-files" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          sorted_files=($(printf "%s\n" "${files[@]}" | sort))
+          
+          hash=$(for f in "${sorted_files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "$f"
+              cat "$f"
+            fi
+          done | sha256sum | cut -d' ' -f1)
+          
+          echo "hash=$hash" >> $GITHUB_OUTPUT
+          echo "${hash}"
+      - name: Delete Changed Cache
+        if: always() && steps.restored-cache-hash.outputs.hash != steps.updated-cache-hash.outputs.hash
+        run: >-
+          gh api --method DELETE
+          -H "Accept: application/vnd.github+json"
+          -H "X-GitHub-Api-Version: 2022-11-28"
+          /repos/${{ github.repository }}/actions/caches?key=${{ steps.restore-cache.outputs.cache-primary-key }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GH_ACT_MGMT }}
       - name: Save Cache
         id: save-cache
-        if: always() && steps.save-cache.outputs.cache-hit != 'true'
+        if: always() && steps.restored-cache-hash.outputs.hash != steps.updated-cache-hash.outputs.hash
         uses: actions/cache/save@v4.2.3
         with:
           key: ${{ steps.restore-cache.outputs.cache-primary-key }}
@@ -77,6 +160,13 @@ jobs:
           name: Artifacts
           path: artifacts/*
           compression-level: 0
+      - name: Attach Artifacts To Release
+        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          generateReleaseNotes: true
+          artifacts: artifacts/*
       - name: Push Tagged Package
         if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         run: >-
@@ -86,7 +176,7 @@ jobs:
           --store-password-in-clear-text
           --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           
-          dotnet nuget push artifacts/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push artifacts/*.nupkg -s "github" -k ${{ secrets.PAT_GH_PKG_MGMT }} --skip-duplicate --no-symbols
     env:
       DOTNET_NOLOGO: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
