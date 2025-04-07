@@ -21,9 +21,25 @@ defaults:
     shell: bash
 
 jobs:
+  skip_check:
+    name: Skip Run Check
+    continue-on-error: true
+    runs-on: ubuntu-22.04
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      -   name: Check if duplicate action
+          id: skip_check
+          uses: fkirc/skip-duplicate-actions@master
+          with:
+            skip_after_successful_duplicate: 'true'
+            paths_ignore: '["**/README.md", ".idea/**", ".editorconfig", ".git*", "docs/**", ".github/**", "**/Doxyfile"]'
+
   build_and_test_on_windows:
     name: Build & Test
     runs-on: windows-2025
+    needs: skip_check
+    if: ${{ (needs.skip_check.outputs.should_skip != 'true') || (github.ref_type == 'tag' && startsWith(github.ref_name, 'v')) }}
     steps:
       - uses: actions/checkout@v4.2.2
         name: Checkout (Workflow Call)
@@ -161,14 +177,14 @@ jobs:
           path: artifacts/*
           compression-level: 0
       - name: Attach Artifacts To Release
-        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        if: always() && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
-          generateReleaseNotes: true
           artifacts: artifacts/*
+          token: ${{ secrets.PAT_GH_PKG_MGMT }}
       - name: Push Tagged Package
-        if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+        if: always() && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
         run: >-
           dotnet nuget add source
           --username ${{ github.repository_owner }}
