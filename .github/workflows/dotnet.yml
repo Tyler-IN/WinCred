@@ -178,9 +178,13 @@ jobs:
           compression-level: 0
       - name: Attach Artifacts To Release
         if: always() && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.16.0
         with:
           allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          omitDraftDuringUpdate: true
+          omitPrereleaseDuringUpdate: true
           artifacts: artifacts/*
           token: ${{ secrets.PAT_GH_PKG_MGMT }}
       - name: Push Tagged Package

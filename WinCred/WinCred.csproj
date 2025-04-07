@@ -9,33 +9,42 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageOutputPath>$(SolutionDir)artifacts</PackageOutputPath>
         <ApplicationIcon>../icon.ico</ApplicationIcon>
+        <IsPackable>true</IsPackable>
     </PropertyGroup>
+
     <PropertyGroup>
-        <Authors>Tyler-IN</Authors>
-        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <PackageProjectUrl>https://github.com/Tyler-IN/WinCred/</PackageProjectUrl>
+        <Title>WinCred</Title>
+        <Description>A library for managing credentials in a local secret store on Windows.</Description>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageDescription>A library for managing credentials in a local secret store on Windows.</PackageDescription>
-        <Copyright>Copyright © 2025 Tyler Young</Copyright>
         <PackageTags>WinCred, Credential, Secret, Store</PackageTags>
+        <Authors>Tyler-IN &lt;tyler@impromptu.ninja&gt;</Authors>
+        <Copyright>Copyright © 2025 Tyler Young</Copyright>
+
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageProjectUrl>https://github.com/Tyler-IN/WinCred/</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Tyler-IN/WinCred.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" PrivateAssets="all"/>
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.1" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.1"/>
     </ItemGroup>
-    
+
     <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="" Visible="false" />
-        <None Include="..\icon.png" Pack="true" PackagePath="" Visible="false" />
+        <None Include="..\README.md" Pack="true" PackagePath="" Visible="false"/>
+        <None Include="..\icon.png" Pack="true" PackagePath="" Visible="false"/>
     </ItemGroup>
-    
+
     <ItemGroup>
-      <Compile Update="AdvApi32.*.cs">
-        <DependentUpon>AdvApi32.cs</DependentUpon>
-      </Compile>
+        <Compile Update="AdvApi32.*.cs">
+            <DependentUpon>AdvApi32.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
