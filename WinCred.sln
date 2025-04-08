@@ -27,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automation", "Automation", 
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
 		.github\dependabot.yml = .github\dependabot.yml
+		git-pre-commit.sh = git-pre-commit.sh
 	EndProjectSection
 EndProject
 Global

@@ -1,20 +1,54 @@
 <Project>
+  <PropertyGroup>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionSuffix>-pre16+dce1043</VersionSuffix>
+    <Version>1.0.1-pre16+dce1043</Version>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(SolutionDir)=/</PathMap>
+    <GenerateFullPaths>false</GenerateFullPaths>
+    <ReportIVTs>true</ReportIVTs>
+    <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
+    <NoWarn>NETSDK1188</NoWarn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <PackageReference>
+      <GeneratePathProperty>true</GeneratePathProperty>
+    </PackageReference>
+  </ItemDefinitionGroup>
+  <Target Name="InstallGitHooks" BeforeTargets="$(MSBuildProjectDefaultTargets);BeforeClean;Clean;BeforeBuild;Build">
+    <Message Text="Installing git hooks..." Importance="high" />
+    <Exec Command="chmod +x &quot;$(SolutionDir)git-pre-commit.sh&quot;" Condition="'$(OS)' != 'Windows_NT'" ContinueOnError="true" />
+    <WriteLinesToFile File="$(SolutionDir).git\hooks\pre-commit" Lines="#!/bin/sh;cd ../..;./git-pre-commit.sh;cd -" Overwrite="true" WriteOnlyWhenDifferent="true" ContinueOnError="true" />
+    <Exec Command="chmod +x &quot;$(SolutionDir).git\hooks\pre-commit&quot;" Condition="'$(OS)' != 'Windows_NT'" ContinueOnError="true" />
+  </Target>
+  <Target Name="UpdateVersionFromGit" DependsOnTargets="InstallGitHooks" BeforeTargets="$(MSBuildProjectDefaultTargets);BeforeClean;Clean;BeforeBuild;Build;BuiltProjectOutputGroup;CollectFrameworkReferences;CollectUpToDateCheckInputDesignTime;CompileDesignTime;ResolveAssemblyReferences;ResolveAssemblyReferencesDesignTime">
+    <Message Text="Updating version from git..." Importance="high" />
+    <Exec Command="git describe --tags --abbrev=0" ConsoleToMsBuild="true" EchoOff="true" StandardOutputImportance="low" ContinueOnError="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="VersionTag" />
+      <Output TaskParameter="ExitCode" PropertyName="GitExitCode" />
+    </Exec>
     <PropertyGroup>
-        <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
-        <Deterministic>true</Deterministic>
-        <PathMap>$(SolutionDir)=/</PathMap>
-        <GenerateFullPaths>false</GenerateFullPaths>
-        <ReportIVTs>true</ReportIVTs>
-        <Version>1.0.1</Version>
-        <Configuration Condition="'$(Configuration)'==''">Release</Configuration>
-        <NoWarn>NETSDK1188</NoWarn>
+      <VersionTag Condition="'$(GitExitCode)' != '0'">v0.0.0</VersionTag>
     </PropertyGroup>
-
-    <ItemDefinitionGroup>
-        <PackageReference>
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-    </ItemDefinitionGroup>
+    <Exec Command="git rev-list --count $(VersionTag)" ConsoleToMsBuild="true" EchoOff="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="CommitsSinceTag" />
+    </Exec>
+    <Exec Command="git rev-parse --short HEAD" ConsoleToMsBuild="true" EchoOff="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="CommitHash" />
+    </Exec>
+    <PropertyGroup>
+      <VersionPrefix>$(VersionTag.TrimStart('v'))</VersionPrefix>
+      <!-- if CommitsSinceTag is not 0, prefix with -pre -->
+      <VersionSuffix>+$(CommitHash)</VersionSuffix>
+      <VersionSuffix Condition="'$(CommitsSinceTag)' != '0'">-pre$(CommitsSinceTag)+$(CommitHash)</VersionSuffix>
+      <Version>$(VersionPrefix)$(VersionSuffix)</Version>
+      <PackageVersion>$(Version)</PackageVersion>
+    </PropertyGroup>
+    <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/VersionPrefix" Value="$(VersionPrefix)" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/VersionSuffix" Value="$(VersionSuffix)" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/Version" Value="$(Version)" />
+  </Target>
 </Project>
