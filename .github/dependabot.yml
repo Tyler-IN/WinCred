@@ -16,3 +16,7 @@ updates:
       - "/WinCred.Test/"
     schedule:
       interval: "daily"
+    groups:
+        dotnet:
+            patterns:
+            - "*"
