@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>-pre16+dce1043</VersionSuffix>
-    <Version>1.0.1-pre16+dce1043</Version>
+    <Version>1.0.1-pre16+485b43a</Version>
+    <VersionPrefix>$(Version.Split('-')[0])</VersionPrefix>
+    <VersionSuffix>-$(Version.Split('-')[1])</VersionSuffix>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
@@ -47,8 +47,6 @@
       <Version>$(VersionPrefix)$(VersionSuffix)</Version>
       <PackageVersion>$(Version)</PackageVersion>
     </PropertyGroup>
-    <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/VersionPrefix" Value="$(VersionPrefix)" />
-    <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/VersionSuffix" Value="$(VersionSuffix)" />
     <XmlPoke XmlInputPath="$(MSBuildThisFileFullPath)" Query="/Project/PropertyGroup/Version" Value="$(Version)" />
   </Target>
 </Project>
