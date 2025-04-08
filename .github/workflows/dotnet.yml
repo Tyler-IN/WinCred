@@ -47,17 +47,24 @@ jobs:
         with:
           show-progress: false
           ref: ${{ inputs.tag }}
+          fetch-tags: true
       - uses: actions/checkout@v4.2.2
         name: Checkout (Workflow Dispatch)
         if: ${{ github.event.inputs.tag != '' && inputs.tag == '' }}
         with:
           show-progress: false
           ref: ${{ github.event.inputs.tag }}
+          fetch-tags: true
       - uses: actions/checkout@v4.2.2
-        name: Checkout (Latest)
+        name: Checkout (Default)
         if: ${{ inputs.tag == '' && github.event.inputs.tag == '' }}
         with:
           show-progress: false
+          fetch-tags: true
+      - name: Fetch commits between latest tag and current checkout
+        run: |
+          git fetch --tags
+          git fetch --shallow-since=$(git log -1 --format=%at $(git describe --tags --abbrev=0 $(git rev-list --tags --max-count=1)))
       - name: Restore Cache
         id: restore-cache
         if: always()
