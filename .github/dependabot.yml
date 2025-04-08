@@ -8,7 +8,7 @@ updates:
       interval: "daily"
   - package-ecosystem: "nuget"
     directories:
-      "/WinCred/"
-      "/WinCred.Test/"
+      - "/WinCred/"
+      - "/WinCred.Test/"
     schedule:
       interval: "daily"
