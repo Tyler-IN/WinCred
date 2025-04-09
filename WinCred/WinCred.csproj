@@ -18,7 +18,7 @@
         <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <PackageDescription>A library for managing credentials in a local secret store on Windows.</PackageDescription>
         <PackageTags>WinCred, Credential, Secret, Store</PackageTags>
-        <Authors>Tyler-IN &lt;tyler@impromptu.ninja&gt;</Authors>
+        <Authors>"Tyler Young" &lt;tyler@impromptu.ninja&gt;</Authors>
         <Copyright>Copyright © 2025 Tyler Young</Copyright>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
